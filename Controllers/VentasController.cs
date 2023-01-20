@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
+using WebAPI_Softek.Models;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WebAPI_Softek.Controllers
@@ -8,36 +9,77 @@ namespace WebAPI_Softek.Controllers
     [ApiController]
     public class VentasController : ControllerBase
     {
-        // GET: api/<VentasController>
+
+            //readonly IVentaRepository _ventaRepository;
+        private readonly VentasContext _context;
+        /*
+        public VentasController(IVentaRepository ventaRepository)
+            {
+                _ventaRepository = ventaRepository;
+            }
+        */
+
+        public VentasController(VentasContext context)
+        {
+            _context = context;
+
+
+
+
+
+        }
+
+
+
+        /*
+           [HttpGet]
+         public ActionResult<List<Venta>> Get()
+            {
+                return Ok(_ventaRepository.ObtenerVentas());
+            }
+        /*
+                [HttpGet("{id}")]
+                public ActionResult<Venta> ObtenerVenta(int id)
+                {
+                    return Ok(_ventaRepository.ObtenerVentasPorId(id));
+                }
+        */
+
+
+
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<IEnumerable<Venta>>> ObtenerVentas()
         {
-            return new string[] { "value1", "value2" };
+            return await _context.Ventas.Include(a => a.Detalles).ToListAsync();
         }
 
-        // GET api/<VentasController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<Venta>> ObtenerVenta(int id)
         {
-            return "value";
+            var venta = await _context.Ventas
+                .FindAsync(id);
+
+            if (venta == null)
+            {
+                return NotFound();
+            }
+
+            return venta;
         }
 
-        // POST api/<VentasController>
+
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<Venta>> PostVenta(Venta venta)
         {
+
+            _context.Ventas.Add(venta);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(
+                nameof(ObtenerVenta),
+                new { id = venta.IdVenta},
+                venta);
         }
 
-        // PUT api/<VentasController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<VentasController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
