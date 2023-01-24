@@ -4,7 +4,6 @@ using WebAPI_Softek.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 //builder.Services.AddScoped<IVentaRepository, VentaRepository>();
 builder.Services.AddControllers();
 builder.Services.AddDbContext<VentasContext>(opt =>
